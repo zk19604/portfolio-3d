@@ -1,0 +1,766 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&display=swap');
+
+/* ─── Reset & Root ─────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #050a0f;
+  font-family: 'Fira Code', 'Courier New', Courier, monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+/* ─── App Shell ─────────────────────────────────────────────────────────────── */
+
+.app-root {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #050a0f;
+  display: grid;
+  place-items: stretch;
+}
+
+/* ─── Terminal Container ────────────────────────────────────────────────────── */
+
+.terminal-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #000d00;
+  border: 1px solid rgba(57, 255, 20, 0.55);
+  border-radius: 3px;
+  color: #39ff14;
+  font-family: 'Fira Code', 'Courier New', Courier, monospace;
+  font-size: 8px;
+  overflow: hidden;
+
+  /* Outer glow — radioactive matrix green */
+  box-shadow:
+    0 0 0 1px rgba(57, 255, 20, 0.08),
+    0 0 12px rgba(57, 255, 20, 0.28),
+    0 0 28px rgba(57, 255, 20, 0.10),
+    inset 0 0 18px rgba(0, 255, 20, 0.04);
+}
+
+/* ─── CRT Scanlines ─────────────────────────────────────────────────────────── */
+
+.terminal-scanlines {
+  position: absolute;
+  inset: 0;
+  /* Tile is 4 px: 1 px dark band + 3 px transparent */
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.09) 0px,
+    rgba(0, 0, 0, 0.09) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  pointer-events: none;
+  z-index: 20;
+  animation: scanlines-scroll 14s linear infinite;
+}
+
+@keyframes scanlines-scroll {
+  from { background-position: 0 0; }
+  to   { background-position: 0 400px; }
+}
+
+/* ─── CRT Vignette ──────────────────────────────────────────────────────────── */
+
+.terminal-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    transparent 55%,
+    rgba(0, 0, 0, 0.62) 100%
+  );
+  pointer-events: none;
+  z-index: 21;
+}
+
+/* ─── Inner Layout ──────────────────────────────────────────────────────────── */
+
+.terminal-inner {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 8px 10px 6px;
+  gap: 3px;
+}
+
+/* ─── Status Bar ────────────────────────────────────────────────────────────── */
+
+.terminal-statusbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(57, 255, 20, 0.2);
+  margin-bottom: 2px;
+}
+
+.terminal-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.terminal-dot--red    { background: #ff5f57; box-shadow: 0 0 4px #ff5f57; }
+.terminal-dot--yellow { background: #ffbd2e; box-shadow: 0 0 4px #ffbd2e; }
+.terminal-dot--green  { background: #28c840; box-shadow: 0 0 4px #28c840; }
+
+.terminal-statusbar-title {
+  margin-left: 6px;
+  font-size: 7px;
+  color: rgba(57, 255, 20, 0.55);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ─── Greeting Lines ────────────────────────────────────────────────────────── */
+
+.terminal-greeting {
+  font-size: 8px;
+  color: #00f3ff;
+  text-shadow: 0 0 8px rgba(0, 243, 255, 0.85);
+  line-height: 1.5;
+}
+
+.terminal-subgreeting {
+  font-size: 7.5px;
+  color: rgba(57, 255, 20, 0.75);
+  text-shadow: 0 0 6px rgba(57, 255, 20, 0.5);
+  line-height: 1.5;
+}
+
+.terminal-prompt-symbol {
+  color: #39ff14;
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.9);
+}
+
+.terminal-divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(57, 255, 20, 0.18) 20%,
+    rgba(57, 255, 20, 0.18) 80%,
+    transparent
+  );
+  margin: 2px 0;
+}
+
+/* ─── History / Response Area ───────────────────────────────────────────────── */
+
+.terminal-history {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-right: 2px;
+  min-height: 0;
+}
+
+.terminal-history::-webkit-scrollbar {
+  width: 3px;
+}
+.terminal-history::-webkit-scrollbar-track {
+  background: transparent;
+}
+.terminal-history::-webkit-scrollbar-thumb {
+  background: rgba(57, 255, 20, 0.25);
+  border-radius: 2px;
+}
+
+.terminal-history-user {
+  font-size: 7.5px;
+  color: #39ff14;
+  text-shadow: 0 0 6px rgba(57, 255, 20, 0.7);
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.terminal-history-ai {
+  font-size: 7.5px;
+  color: #a8ffb0;
+  text-shadow: 0 0 4px rgba(57, 255, 20, 0.35);
+  line-height: 1.5;
+  word-break: break-word;
+  padding-left: 2px;
+  border-left: 2px solid rgba(0, 243, 255, 0.35);
+}
+
+.terminal-ai-tag {
+  color: #00f3ff;
+  text-shadow: 0 0 7px rgba(0, 243, 255, 0.8);
+}
+
+/* Thinking animation */
+.terminal-thinking {
+  font-size: 7.5px;
+  color: #00f3ff;
+  text-shadow: 0 0 8px rgba(0, 243, 255, 0.9);
+  animation: thinking-pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes thinking-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+/* ─── Input Row ─────────────────────────────────────────────────────────────── */
+
+.terminal-input-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(57, 255, 20, 0.15);
+  flex-shrink: 0;
+}
+
+.terminal-prompt-label {
+  font-size: 7px;
+  color: rgba(57, 255, 20, 0.7);
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: -0.01em;
+}
+
+.terminal-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(57, 255, 20, 0.3);
+  color: #39ff14;
+  font-family: 'Fira Code', 'Courier New', Courier, monospace;
+  font-size: 7.5px;
+  outline: none;
+  caret-color: #39ff14;
+  text-shadow: 0 0 6px rgba(57, 255, 20, 0.7);
+  padding: 1px 0;
+  transition: border-color 0.2s;
+}
+
+.terminal-input:focus {
+  border-color: rgba(57, 255, 20, 0.65);
+}
+
+.terminal-input::placeholder {
+  color: rgba(57, 255, 20, 0.25);
+  font-style: italic;
+}
+
+.terminal-input:disabled {
+  opacity: 0.4;
+}
+
+.terminal-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid rgba(57, 255, 20, 0.5);
+  color: #39ff14;
+  font-family: 'Fira Code', 'Courier New', Courier, monospace;
+  font-size: 6.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  cursor: pointer;
+  text-shadow: 0 0 6px rgba(57, 255, 20, 0.8);
+  border-radius: 2px;
+  transition: background 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.terminal-btn:hover:not(:disabled) {
+  background: rgba(57, 255, 20, 0.12);
+  border-color: rgba(57, 255, 20, 0.8);
+  box-shadow: 0 0 8px rgba(57, 255, 20, 0.35);
+}
+
+.terminal-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ─── Cursor ────────────────────────────────────────────────────────────────── */
+
+.terminal-cursor-row {
+  flex-shrink: 0;
+  height: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.terminal-cursor-block {
+  display: inline-block;
+  width: 6px;
+  height: 9px;
+  background: #39ff14;
+  box-shadow: 0 0 6px rgba(57, 255, 20, 0.9);
+  animation: cursor-blink 1.1s step-end infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   D-PAD NAVIGATION CONTROLS
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Root wrapper — sits over the canvas, pointer-events off by default so the
+   3D scene is still interactive. Child elements re-enable as needed.          */
+.controls-root {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0 32px;
+}
+
+/* ─── Zone HUD ───────────────────────────────────────────────────────────────── */
+
+.zone-hud {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 16px;
+  background: rgba(5, 10, 20, 0.65);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 243, 255, 0.22);
+  border-radius: 20px;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  box-shadow: 0 0 16px rgba(0, 243, 255, 0.08), inset 0 1px 0 rgba(255,255,255,0.04);
+  pointer-events: none;
+}
+
+.zone-hud-bracket {
+  font-size: 11px;
+  color: rgba(0, 243, 255, 0.45);
+}
+
+.zone-hud-name {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #00f3ff;
+  text-shadow: 0 0 10px rgba(0, 243, 255, 0.8);
+}
+
+/* ─── D-pad Wrapper ──────────────────────────────────────────────────────────── */
+
+.dpad-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.dpad-hint {
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: rgba(0, 243, 255, 0.35);
+  text-align: center;
+  margin: 0;
+}
+
+/* ─── D-pad Grid ─────────────────────────────────────────────────────────────── */
+
+.dpad {
+  display: grid;
+  grid-template-areas:
+    '. up .'
+    'left center right'
+    '. down .';
+  grid-template-columns: 48px 48px 48px;
+  grid-template-rows: 48px 48px 48px;
+  gap: 5px;
+  padding: 12px;
+  background: rgba(6, 10, 22, 0.72);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 243, 255, 0.2);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.55),
+    0 0 24px rgba(0, 243, 255, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* ─── D-pad Buttons ──────────────────────────────────────────────────────────── */
+
+.dpad-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: rgba(0, 20, 40, 0.75);
+  border: 1px solid rgba(0, 243, 255, 0.28);
+  border-radius: 10px;
+  color: #00f3ff;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.12s, border-color 0.12s, box-shadow 0.12s, transform 0.08s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.dpad-btn:hover {
+  background: rgba(0, 243, 255, 0.1);
+  border-color: rgba(0, 243, 255, 0.55);
+  box-shadow: 0 0 14px rgba(0, 243, 255, 0.28);
+}
+
+.dpad-btn--active,
+.dpad-btn:active {
+  background: rgba(0, 243, 255, 0.22);
+  border-color: rgba(0, 243, 255, 0.8);
+  box-shadow: 0 0 18px rgba(0, 243, 255, 0.45);
+  transform: scale(0.91);
+}
+
+/* Grid area assignments */
+.dpad-btn--up     { grid-area: up;     }
+.dpad-btn--left   { grid-area: left;   }
+.dpad-btn--center { grid-area: center; border-color: rgba(0, 243, 255, 0.14); }
+.dpad-btn--right  { grid-area: right;  }
+.dpad-btn--down   { grid-area: down;   }
+
+.dpad-arrow {
+  font-size: 14px;
+  line-height: 1;
+  text-shadow: 0 0 8px rgba(0, 243, 255, 0.9);
+}
+
+/* Zone abbreviation label under the arrow */
+.dpad-label {
+  font-size: 6.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: rgba(0, 243, 255, 0.55);
+  line-height: 1;
+}
+
+/* Home/center button special style */
+.dpad-btn--center .dpad-arrow {
+  font-size: 16px;
+  color: rgba(0, 243, 255, 0.6);
+  text-shadow: 0 0 6px rgba(0, 243, 255, 0.5);
+}
+
+/* ─── Pressed / aria-pressed active glow ─────────────────────────────────────── */
+.dpad-btn[aria-pressed='true'] {
+  border-color: rgba(0, 243, 255, 0.6);
+  box-shadow: 0 0 12px rgba(0, 243, 255, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   3D ZONE LABELS (Html inside Canvas)
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.zone-3d-label {
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 4px 14px;
+  border: 1px solid;
+  border-radius: 3px;
+  background: rgba(5, 10, 20, 0.72);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+  /* glow uses the inline --glow custom prop set per-zone */
+  text-shadow: 0 0 12px currentColor, 0 0 24px currentColor;
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.06), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ZONE PANEL — right-side content overlay
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.zone-panel-shell {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 380px;
+  height: 100vh;
+  z-index: 50;
+  pointer-events: none;  /* shell is click-through; panel re-enables */
+}
+
+.zone-panel {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 10, 20, 0.88);
+  backdrop-filter: blur(18px);
+  border-left: 1px solid rgba(0, 243, 255, 0.16);
+  overflow-y: auto;
+  overflow-x: hidden;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.zone-panel::-webkit-scrollbar { width: 4px; }
+.zone-panel::-webkit-scrollbar-track { background: transparent; }
+.zone-panel::-webkit-scrollbar-thumb { background: rgba(0, 243, 255, 0.2); border-radius: 2px; }
+
+/* ─── Home panel ──────────────────────────────────────────────────────────── */
+
+.zp-home {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px 18px 14px;
+  gap: 10px;
+}
+
+.zp-home-header {
+  flex-shrink: 0;
+}
+
+.zp-home-hint {
+  font-family: 'Fira Code', monospace;
+  font-size: 9px;
+  color: rgba(57, 255, 20, 0.45);
+  margin-top: 5px;
+  letter-spacing: 0.06em;
+}
+
+.zp-terminal-wrap {
+  flex: 1;
+  min-height: 0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Scale up the terminal when inside the zone panel */
+.zp-terminal-wrap .terminal-container {
+  font-size: 11px;
+}
+.zp-terminal-wrap .terminal-greeting   { font-size: 12px; }
+.zp-terminal-wrap .terminal-subgreeting { font-size: 11px; }
+.zp-terminal-wrap .terminal-history-user,
+.zp-terminal-wrap .terminal-history-ai,
+.zp-terminal-wrap .terminal-thinking  { font-size: 11px; }
+.zp-terminal-wrap .terminal-prompt-label { font-size: 10px; }
+.zp-terminal-wrap .terminal-input     { font-size: 11px; }
+.zp-terminal-wrap .terminal-btn       { font-size: 9px; }
+.zp-terminal-wrap .terminal-statusbar-title { font-size: 9px; }
+
+/* ─── Shared zone content layout ──────────────────────────────────────────── */
+
+.zp-content {
+  padding: 20px 18px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.zp-title {
+  font-family: 'Fira Code', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-shadow: 0 0 14px currentColor;
+  margin: 0;
+}
+
+.zp-tag {
+  display: inline-block;
+  font-family: 'Fira Code', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border: 1px solid;
+  border-radius: 2px;
+  text-shadow: 0 0 8px currentColor;
+}
+
+.zp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ─── Card ────────────────────────────────────────────────────────────────── */
+
+.zp-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid;
+  border-radius: 4px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.zp-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.zp-card-title {
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-shadow: 0 0 8px currentColor;
+}
+
+.zp-card-meta {
+  font-family: 'Fira Code', monospace;
+  font-size: 9px;
+  color: rgba(180, 210, 240, 0.55);
+  letter-spacing: 0.04em;
+}
+
+.zp-card-desc {
+  font-family: 'Fira Code', monospace;
+  font-size: 9.5px;
+  color: rgba(180, 210, 240, 0.7);
+  line-height: 1.55;
+}
+
+.zp-card-gpa {
+  font-family: 'Fira Code', monospace;
+  font-size: 10px;
+  color: rgba(180, 210, 240, 0.65);
+}
+.zp-card-gpa strong {
+  color: rgba(220, 240, 255, 0.9);
+}
+
+.zp-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.zp-bullets li {
+  font-family: 'Fira Code', monospace;
+  font-size: 9px;
+  color: rgba(180, 210, 240, 0.7);
+  line-height: 1.5;
+  padding-left: 10px;
+  position: relative;
+}
+
+.zp-bullets li::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  color: rgba(0, 243, 255, 0.5);
+}
+
+/* ─── Tags / chips ────────────────────────────────────────────────────────── */
+
+.zp-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.zp-chip {
+  font-family: 'Fira Code', monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border: 1px solid;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ─── Links ───────────────────────────────────────────────────────────────── */
+
+.zp-links {
+  display: flex;
+  gap: 10px;
+}
+
+.zp-link {
+  font-family: 'Fira Code', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-shadow: 0 0 8px currentColor;
+  transition: opacity 0.15s;
+}
+.zp-link:hover { opacity: 0.75; }
+
+/* ─── Tech Stack grid ─────────────────────────────────────────────────────── */
+
+.zp-skill-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.zp-skill-group {
+  border: 1px solid;
+  border-radius: 4px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.zp-skill-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px currentColor;
+}
+
+.zp-skill-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+

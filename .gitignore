@@ -1,0 +1,13 @@
+# Python
+fastapi/venv/
+fastapi/__pycache__/
+fastapi/.env
+**/*.pyc
+.DS_Store
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Env
+.env
