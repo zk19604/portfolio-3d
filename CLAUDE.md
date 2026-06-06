@@ -38,7 +38,22 @@ Binary assets (`.glb`, `.fbx`) must be imported with the `?url` suffix so Vite/R
 Single source of truth for all portfolio content: `EDUCATION`, `PROJECTS`, `SKILL_GROUPS`, `EXPERIENCE`, `CONTACT_LINKS`. This is a TypeScript file at the root (not inside `frontend/`) — it needs to be copied or imported by the frontend. When updating portfolio content, edit this file only.
 
 ### Frontend — `frontend/`
-React 19 + Vite app. The 3D scene is built with `@react-three/fiber` and `@react-three/drei`, with physics via `@react-three/rapier`. Styling is Tailwind CSS v3 (dark futuristic theme). `frontend/src/App.jsx` is currently the Vite boilerplate starter and needs to be replaced with the actual portfolio UI. Components and hooks live in `frontend/src/components/` and `frontend/src/hooks/` (both currently empty). The 3D character asset is at `frontend/src/assets/walking.glb`.
+React 19 + Vite app. Third-person game-like 3D portfolio inspired by Bruno Simon. Key files:
+
+- **`App.jsx`** — Root orchestrator. Renders Scene + ZonePanel + DirectionControls. Owns `activeZone` state and `handleAskQuestion` callback.
+- **`components/Scene.jsx`** — R3F Canvas. Contains: `Character` (Mixamo GLB + animation state machine), `FollowCamera` (smooth third-person camera), `ZoneArea` (4 zones with 3D structures), `Workstation` (visual prop only — no Html), `FloorGrid`, `HomeMarker`.
+- **`components/ZonePanel.jsx`** — Right-side 2D overlay (380px, z-index 50). Shows AI terminal when `activeZone=null`, and zone-specific portfolio content when at a zone. Uses framer-motion AnimatePresence for slide-in.
+- **`components/DirectionControls.jsx`** — D-pad HTML overlay + zone HUD. Dispatches to `useCharacterMovement`.
+- **`hooks/useCharacterMovement.js`** — Keyboard listener, zone target positions.
+
+**Critical patterns:**
+- Binary assets: `import model from './foo.glb?url'` (Rolldown rejects raw binary)
+- Imperative 3D transforms: set in `useEffect(() => { group.current.position.set(...) }, [])`, never as JSX props — R3F reconciler re-applies props on re-render
+- `useAnimations` animation mutations: must happen inside `useFrame` via `configuredRef` guard (react-hooks/immutability v7 forbids mutations in `useEffect`)
+- `characterRef`: created in Scene, passed as `groupRef` prop to Character AND to FollowCamera — this lets the camera read the character's live position/rotation without context
+- FollowCamera: `camAngleRef=null` on init → snaps to correct position on first frame character loads. Camera angle lerps with lag (0.05/frame) for cinematic weight
+- Zone content: `onAsk`/`isLoading` go to **ZonePanel**, not to Scene. Scene only gets `{ targetPosition, targetZone, onArrive }`
+- Arrival: `arrivedAtRef.current !== targetZone` guard fires `onArrive` exactly once per zone visit at 60fps
 
 ### Backend — `fastapi/`
 FastAPI app with a single route `POST /api/ask` that calls a thin RAG pipeline (`rag.py` → `gemini_client.py`). The RAG layer is currently just a system-prompt wrapper around Gemini (`gemini-1.5-flash`) — no vector store yet. CORS is locked to `http://localhost:5173`. The Gemini API key lives in `fastapi/.env` as `GEMINI_API_KEY`.
