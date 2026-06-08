@@ -56,7 +56,8 @@ export default function App() {
   const handleAskQuestion = useCallback(async (question, onResponse) => {
     setIsLoading(true)
     try {
-      const res = await fetch('http://localhost:8000/api/ask', {
+      const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+      const res = await fetch(`${API}/api/ask`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question }),
