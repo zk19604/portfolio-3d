@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 
-// ─── Floating chat box ───────────────────────────────────────────────────────────
-// Rendered above the character's head (via drei <Html>) and/or toggled by the
-// bottom chat button. Talks to the same onAsk(question, onResponse) pipeline.
+// ─── Pixel computer chat ─────────────────────────────────────────────────────────
+// A cute retro CRT computer that pops up bottom-left. Talks to the same
+// onAsk(question, onResponse) pipeline.
 export default function ChatBox({ onAsk, isLoading, onClose }) {
   const [input, setInput] = useState('')
   const [history, setHistory] = useState([])
@@ -22,34 +22,42 @@ export default function ChatBox({ onAsk, isLoading, onClose }) {
   }
 
   return (
-    <div className="chatbox" onPointerDown={(e) => e.stopPropagation()}>
-      <div className="chatbox-beak" />
-      <div className="chatbox-head">
-        <span className="chatbox-avatar">🌸</span>
-        <span className="chatbox-title">Ask Zainab</span>
-        {onClose && <button className="chatbox-x" onClick={onClose} aria-label="Close chat">✕</button>}
+    <div className="pc" onPointerDown={(e) => e.stopPropagation()}>
+      <div className="pc-monitor">
+        <div className="pc-bar">
+          <span className="pc-bar-title">ASK-ZAINAB.EXE</span>
+          {onClose && <button className="pc-bar-x" onClick={onClose} aria-label="Close chat">X</button>}
+        </div>
+
+        <div className="pc-screen" ref={scroller}>
+          {history.length === 0 && (
+            <p className="pc-hello">&gt; HI! ASK ME ANYTHING ABOUT MY PROJECTS, SKILLS OR EXPERIENCE_</p>
+          )}
+          {history.map((m, i) => (
+            <div key={i} className={`pc-msg pc-msg--${m.role}`}>
+              <span className="pc-msg-tag">{m.role === 'user' ? 'YOU' : 'ZK'}</span>
+              {m.text}
+            </div>
+          ))}
+          {isLoading && <div className="pc-msg pc-msg--ai pc-typing">ZK: thinking...</div>}
+        </div>
+
+        <form className="pc-form" onSubmit={submit}>
+          <span className="pc-prompt">&gt;</span>
+          <input
+            className="pc-input"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="TYPE HERE"
+            autoFocus
+          />
+          <button className="pc-send" type="submit" disabled={isLoading}>SEND</button>
+        </form>
       </div>
 
-      <div className="chatbox-body" ref={scroller}>
-        {history.length === 0 && (
-          <p className="chatbox-hello">Hi! Ask me anything about my projects, skills, or experience ♡</p>
-        )}
-        {history.map((m, i) => (
-          <div key={i} className={`chatbox-msg chatbox-msg--${m.role}`}>{m.text}</div>
-        ))}
-        {isLoading && <div className="chatbox-msg chatbox-msg--ai chatbox-typing">typing…</div>}
-      </div>
-
-      <form className="chatbox-form" onSubmit={submit}>
-        <input
-          className="chatbox-input"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a question…"
-          autoFocus
-        />
-        <button className="chatbox-send" type="submit" disabled={isLoading}>➤</button>
-      </form>
+      {/* computer base / stand */}
+      <div className="pc-neck" />
+      <div className="pc-stand" />
     </div>
   )
 }

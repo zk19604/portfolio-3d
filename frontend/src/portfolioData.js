@@ -89,9 +89,9 @@ export const EDUCATION = [
 ]
 
 export const CONTACT_LINKS = [
-  { label: 'Email',    value: 'zainab19604khalil@gmail.com', href: 'mailto:zainab19604khalil@gmail.com', icon: '✉' },
-  { label: 'GitHub',   value: 'github.com/zk19604',          href: 'https://github.com/zk19604',          icon: '⌥' },
-  { label: 'LinkedIn', value: 'linkedin.com/in/zainabkhalil', href: 'https://www.linkedin.com/in/zainab-khalil-332b1831b/', icon: 'in' },
+  { label: 'Email',    value: 'zainab19604khalil@gmail.com', href: 'mailto:zainab19604khalil@gmail.com', icon: 'EM' },
+  { label: 'GitHub',   value: 'github.com/zk19604',          href: 'https://github.com/zk19604',          icon: 'GH' },
+  { label: 'LinkedIn', value: 'linkedin.com/in/zainabkhalil', href: 'https://www.linkedin.com/in/zainab-khalil-332b1831b/', icon: 'IN' },
 ]
 
 export const SKILL_GROUPS = [

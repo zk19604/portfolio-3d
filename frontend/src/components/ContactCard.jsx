@@ -19,8 +19,8 @@ export default function ContactCard() {
             transition={{ duration: 0.22, ease: 'easeOut' }}
           >
             <div className="contact-pop-head">
-              <span>Let’s connect ♡</span>
-              <button className="contact-x" onClick={() => setOpen(false)} aria-label="Close">✕</button>
+              <span>LET'S CONNECT</span>
+              <button className="contact-x" onClick={() => setOpen(false)} aria-label="Close">X</button>
             </div>
             <div className="contact-links">
               {CONTACT_LINKS.map((c) => (
@@ -42,7 +42,7 @@ export default function ContactCard() {
         onClick={() => setOpen((o) => !o)}
         aria-label="Contact me"
       >
-        {open ? '✕' : '✉ Contact me'}
+        {open ? 'CLOSE' : 'CONTACT ME'}
       </button>
     </div>
   )

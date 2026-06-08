@@ -4,6 +4,9 @@ import DirectionControls from './components/DirectionControls'
 import EnterPrompt from './components/EnterPrompt'
 import Minimap from './components/Minimap'
 import ContactCard from './components/ContactCard'
+import ChatBox from './components/ChatBox'
+import WorldMapPanel from './components/WorldMapPanel'
+import CameraControls from './components/CameraControls'
 import { usePlayerControls } from './hooks/useCharacterMovement'
 import { ZONE_LABELS } from './zones'
 
@@ -12,10 +15,12 @@ export default function App() {
   const [activeZone, setActiveZone] = useState(null)
   const [nearZone, setNearZone]     = useState(null)
   const [chatOpen, setChatOpen]     = useState(false)
+  const [mapOpen, setMapOpen]       = useState(false)
 
   const nearRef = useRef(null)
   const playerPosRef = useRef({ x: 0, z: 0 })
   const travelRef = useRef({ zone: null, n: 0 })
+  const cameraViewRef = useRef({ yaw: 0, radius: 8, height: 4.6 })
 
   const handleNearChange = useCallback((zone) => {
     nearRef.current = zone
@@ -71,10 +76,8 @@ export default function App() {
         playerPosRef={playerPosRef}
         travelRef={travelRef}
         onModelClick={toggleChat}
-        chatOpen={chatOpen}
-        onAsk={handleAskQuestion}
-        isLoading={isLoading}
-        onCloseChat={() => setChatOpen(false)}
+        onOpenMap={() => setMapOpen(true)}
+        cameraViewRef={cameraViewRef}
       />
 
       <Minimap playerPosRef={playerPosRef} activeZone={activeZone} onTravel={travelTo} />
@@ -83,18 +86,38 @@ export default function App() {
 
       <DirectionControls nearZone={nearZone} activeZone={activeZone} />
 
-      {/* floating chat toggle — bottom-left */}
-      <button
-        className={`chat-fab${chatOpen ? ' is-open' : ''}`}
-        onClick={toggleChat}
-        aria-label="Open chat"
-      >
-        <span className="chat-fab-ico">💬</span>
-        <span className="chat-fab-text">{chatOpen ? 'Close chat' : 'Chat with me'}</span>
-      </button>
+      {/* camera view controls — right edge */}
+      <CameraControls viewRef={cameraViewRef} />
+
+      {/* pixel computer chat — bottom-left */}
+      <div className="chat-dock">
+        {chatOpen && (
+          <ChatBox
+            onAsk={handleAskQuestion}
+            isLoading={isLoading}
+            onClose={() => setChatOpen(false)}
+          />
+        )}
+        <button
+          className={`chat-fab${chatOpen ? ' is-open' : ''}`}
+          onClick={toggleChat}
+          aria-label="Open chat"
+        >
+          {chatOpen ? 'CLOSE' : 'CHAT WITH ME'}
+        </button>
+      </div>
 
       {/* floating contact — bottom-right */}
       <ContactCard />
+
+      {/* world map fast-travel overlay */}
+      {mapOpen && (
+        <WorldMapPanel
+          activeZone={activeZone}
+          onTravel={travelTo}
+          onClose={() => setMapOpen(false)}
+        />
+      )}
     </div>
   )
 }

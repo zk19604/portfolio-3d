@@ -2,9 +2,9 @@ import { useRef, useEffect, useMemo, useState, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { Html, Float, ContactShadows } from '@react-three/drei'
+import { EffectComposer, Pixelation } from '@react-three/postprocessing'
 import { toonGradient } from './toonGradient'
 import ToonCharacter from './ToonCharacter'
-import ChatBox from './ChatBox'
 import { ZONES, ZONE_POS } from '../zones'
 import { EXPERIENCE, PROJECTS, EDUCATION, SKILL_GROUPS } from '../portfolioData'
 
@@ -34,7 +34,7 @@ function faceTo(g, mx, mz, delta) {
 // ─── Character controller ───────────────────────────────────────────────────────
 function Character({
   groupRef, keysRef, activeZone, onNearChange, onLeaveZone, playerPosRef, travelRef,
-  obstacles, onModelClick, chatOpen, onAsk, isLoading, onCloseChat,
+  obstacles, onModelClick, cameraViewRef,
 }) {
   const gaitRef = useRef(0)
   const nearRef = useRef(null)
@@ -95,8 +95,17 @@ function Character({
     } else {
       leftRef.current = false
       const k = keysRef.current
-      mx = k.r - k.l; mz = k.b - k.f
-      if (mx || mz) moving = true
+      const fAmt = k.f - k.b   // forward (into the screen) positive
+      const rAmt = k.r - k.l   // strafe right positive
+      if (fAmt || rAmt) {
+        // rotate the input by the camera yaw so movement is screen-relative:
+        // "forward" always heads away from the camera whatever angle it orbits to.
+        const yaw = cameraViewRef?.current?.yaw ?? 0
+        const sin = Math.sin(yaw), cos = Math.cos(yaw)
+        mx = -sin * fAmt + cos * rAmt
+        mz = -cos * fAmt - sin * rAmt
+        moving = true
+      }
     }
 
     if (moving) {
@@ -142,17 +151,12 @@ function Character({
       onPointerOut={() => (document.body.style.cursor = 'auto')}
     >
       <ToonCharacter gaitRef={gaitRef} />
-      {chatOpen && (
-        <Html position={[0, 2.55, 0]} center distanceFactor={7} zIndexRange={[60, 40]}>
-          <ChatBox onAsk={onAsk} isLoading={isLoading} onClose={onCloseChat} />
-        </Html>
-      )}
     </group>
   )
 }
 
 // ─── Follow camera ──────────────────────────────────────────────────────────────
-function FollowCamera({ characterRef, focusPos }) {
+function FollowCamera({ characterRef, focusPos, viewRef }) {
   const desired = useRef(new THREE.Vector3())
   const lookAt  = useRef(new THREE.Vector3(0, 1, 0))
   const snapped = useRef(false)
@@ -169,7 +173,12 @@ function FollowCamera({ characterRef, focusPos }) {
     }
     if (!characterRef.current) { state.camera.lookAt(0, 1, 0); return }
     const cp = characterRef.current.position
-    desired.current.set(cp.x, cp.y, cp.z).add(CAM_OFFSET)
+    // orbit offset driven by the on-screen view controls (yaw / radius / height)
+    const v = viewRef?.current
+    const r   = v ? v.radius : CAM_OFFSET.z
+    const h   = v ? v.height : CAM_OFFSET.y
+    const yaw = v ? v.yaw    : 0
+    desired.current.set(cp.x + Math.sin(yaw) * r, cp.y + h, cp.z + Math.cos(yaw) * r)
     if (!snapped.current) {
       state.camera.position.copy(desired.current)
       lookAt.current.set(cp.x, cp.y + 1, cp.z)
@@ -310,7 +319,7 @@ function ZoneContent({ name, color }) {
     <div className="zone-float" style={{ '--c': color }} onPointerDown={(e) => e.stopPropagation()}>
       <div className="zone-float-title">{title}</div>
       <div className="zone-float-scroll">{rows}</div>
-      <div className="zone-float-hint">Walk away to leave ✿</div>
+      <div className="zone-float-hint">Walk away to leave</div>
     </div>
   )
 }
@@ -375,11 +384,22 @@ function ZoneArea({ position, color, title, name, active, onSelect }) {
 }
 
 // ─── Central holographic map ────────────────────────────────────────────────────
-function CentralMap() {
+function CentralMap({ onOpenMap }) {
   const disc = useRef()
-  useFrame((s) => { if (disc.current) disc.current.rotation.y = s.clock.elapsedTime * 0.25 })
+  const [hovered, setHovered] = useState(false)
+  useFrame((s) => {
+    if (disc.current) disc.current.rotation.y = s.clock.elapsedTime * (hovered ? 0.7 : 0.25)
+  })
+  useEffect(() => {
+    document.body.style.cursor = hovered ? 'pointer' : 'auto'
+    return () => { document.body.style.cursor = 'auto' }
+  }, [hovered])
   return (
-    <group>
+    <group
+      onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
+      onPointerOut={() => setHovered(false)}
+      onClick={(e) => { e.stopPropagation(); onOpenMap?.() }}
+    >
       <mesh position={[0, 0.35, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[1.0, 1.25, 0.7, 24]} />
         <Toon color="#b8b1c4" />
@@ -403,7 +423,7 @@ function CentralMap() {
       </group>
       <pointLight color="#9fe9ff" intensity={1.4} distance={6} position={[0, 1.6, 0]} />
       <Html position={[0, 2.0, 0]} center pointerEvents="none" zIndexRange={[20, 0]}>
-        <div className="zone-3d-label" style={{ '--c': '#79e7ff', borderColor: '#79e7ff', fontSize: '10px' }}>WORLD MAP</div>
+        <div className="zone-3d-label" style={{ '--c': '#79e7ff', borderColor: '#79e7ff' }}>WORLD MAP</div>
       </Html>
     </group>
   )
@@ -449,7 +469,58 @@ function Tree({ position, scale = 1 }) {
   )
 }
 
+// A bloom you can poke — pops bigger on hover and spins + bounces when clicked.
+function Bloom({ position, color }) {
+  const grp = useRef()
+  const [hovered, setHovered] = useState(false)
+  const spin = useRef(0)
+
+  useFrame((s) => {
+    if (!grp.current) return
+    // idle sway so the meadow feels alive
+    const t = s.clock.elapsedTime + position[0] + position[2]
+    grp.current.rotation.z = Math.sin(t * 1.6) * 0.12
+    // click spin decays back to rest
+    if (spin.current > 0.001) {
+      grp.current.rotation.y += spin.current
+      spin.current *= 0.92
+    }
+    const target = hovered ? 1.5 : 1
+    grp.current.scale.setScalar(THREE.MathUtils.lerp(grp.current.scale.x, target, 0.18))
+  })
+
+  return (
+    <group
+      ref={grp}
+      position={position}
+      onPointerOver={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer' }}
+      onPointerOut={() => { setHovered(false); document.body.style.cursor = 'auto' }}
+      onClick={(e) => { e.stopPropagation(); spin.current = 0.5 }}
+    >
+      <mesh position={[0, 0.18, 0]}>
+        <cylinderGeometry args={[0.02, 0.02, 0.36, 6]} />
+        <Toon color="#3aa052" />
+      </mesh>
+      <mesh position={[0, 0.38, 0]}>
+        <sphereGeometry args={[0.09, 12, 12]} />
+        <Toon color={color} />
+      </mesh>
+      {/* little petals so the pop reads clearly */}
+      {[0, 1, 2, 3, 4].map((n) => {
+        const a = (n * Math.PI * 2) / 5
+        return (
+          <mesh key={n} position={[Math.cos(a) * 0.1, 0.38, Math.sin(a) * 0.1]} scale={[0.05, 0.03, 0.05]}>
+            <sphereGeometry args={[1, 8, 8]} />
+            <Toon color={color} />
+          </mesh>
+        )
+      })}
+    </group>
+  )
+}
+
 function Decor({ trees, rocks, blooms }) {
+  const palette = ['#ff6fae', '#ffd23e', '#7ec8ff', '#ff8a4c']
   return (
     <group>
       {trees.map((t, i) => <Tree key={i} position={[t.x, 0, t.z]} scale={t.s} />)}
@@ -460,16 +531,7 @@ function Decor({ trees, rocks, blooms }) {
         </mesh>
       ))}
       {blooms.map((b, i) => (
-        <group key={i} position={[b.x, 0, b.z]}>
-          <mesh position={[0, 0.18, 0]}>
-            <cylinderGeometry args={[0.02, 0.02, 0.36, 6]} />
-            <Toon color="#3aa052" />
-          </mesh>
-          <mesh position={[0, 0.38, 0]}>
-            <sphereGeometry args={[0.09, 12, 12]} />
-            <Toon color={['#ff6fae', '#ffd23e', '#7ec8ff', '#ff8a4c'][i % 4]} />
-          </mesh>
-        </group>
+        <Bloom key={i} position={[b.x, 0, b.z]} color={palette[i % 4]} />
       ))}
     </group>
   )
@@ -541,10 +603,97 @@ function HomeMarker() {
   )
 }
 
+// ─── Pixel cat — black & white voxel kitty that trails the character ─────────────
+function Cat({ characterRef }) {
+  const grp = useRef()
+  const tail = useRef()
+  const earL = useRef()
+  const earR = useRef()
+  const phase = useRef(0)
+  const yaw = useRef(0)
+
+  // voxel material — flat solid, nearest-filtered look comes from the pixelation pass
+  const B = '#1a1a1a' // black
+  const W = '#f5f5f5' // white
+  const P = '#ff9ab0' // tiny pink nose (still reads as B/W kitty)
+
+  useFrame((s, delta) => {
+    const cat = grp.current
+    const char = characterRef.current
+    if (!cat || !char) return
+    const cp = char.position
+    const dx = cp.x - cat.position.x
+    const dz = cp.z - cat.position.z
+    const dist = Math.hypot(dx, dz)
+
+    const FOLLOW = 0.95
+    let moving = false
+    if (dist > FOLLOW) {
+      const k = Math.min(1, delta * 5) * ((dist - FOLLOW) / dist)
+      cat.position.x += dx * k
+      cat.position.z += dz * k
+      moving = dist > FOLLOW + 0.08
+      const ang = Math.atan2(dx, dz)
+      let d = ang - yaw.current
+      if (d > Math.PI) d -= 2 * Math.PI
+      if (d < -Math.PI) d += 2 * Math.PI
+      yaw.current += d * Math.min(1, delta * 8)
+      cat.rotation.y = yaw.current
+    }
+
+    phase.current += delta * (moving ? 11 : 2.5)
+    const hop = Math.abs(Math.sin(phase.current)) * (moving ? 0.09 : 0.02)
+    cat.position.y = hop
+    if (tail.current) tail.current.rotation.x = -0.5 + Math.sin(phase.current * 1.5) * 0.4
+    if (earL.current) earL.current.rotation.z = Math.sin(phase.current) * 0.12
+    if (earR.current) earR.current.rotation.z = -Math.sin(phase.current) * 0.12
+  })
+
+  const box = (pos, size, color, ref) => (
+    <mesh ref={ref} position={pos} castShadow>
+      <boxGeometry args={size} />
+      <meshToonMaterial color={color} gradientMap={toonGradient()} />
+    </mesh>
+  )
+
+  return (
+    <group ref={grp} position={[0.7, 0, 6.4]} scale={0.6}>
+      {/* body */}
+      {box([0, 0.32, 0], [0.42, 0.3, 0.62], W)}
+      {/* black saddle patch */}
+      {box([0, 0.49, -0.05], [0.44, 0.06, 0.4], B)}
+      {/* legs */}
+      {[[-0.14, 0.2], [0.14, 0.2], [-0.14, -0.2], [0.14, -0.2]].map(([x, z], i) => (
+        <mesh key={i} position={[x, 0.1, z]} castShadow>
+          <boxGeometry args={[0.12, 0.2, 0.12]} />
+          <meshToonMaterial color={i % 2 ? B : W} gradientMap={toonGradient()} />
+        </mesh>
+      ))}
+      {/* head */}
+      {box([0, 0.5, 0.4], [0.34, 0.32, 0.3], W)}
+      {/* ears */}
+      <group ref={earL} position={[-0.12, 0.68, 0.42]}>{box([0, 0, 0], [0.1, 0.12, 0.06], B)}</group>
+      <group ref={earR} position={[0.12, 0.68, 0.42]}>{box([0, 0, 0], [0.1, 0.12, 0.06], B)}</group>
+      {/* eyes */}
+      {box([-0.08, 0.54, 0.56], [0.05, 0.06, 0.02], B)}
+      {box([0.08, 0.54, 0.56], [0.05, 0.06, 0.02], B)}
+      {/* nose */}
+      {box([0, 0.46, 0.57], [0.04, 0.03, 0.02], P)}
+      {/* tail */}
+      <group ref={tail} position={[0, 0.4, -0.32]}>
+        <mesh position={[0, 0.08, -0.14]} castShadow>
+          <boxGeometry args={[0.08, 0.08, 0.34]} />
+          <meshToonMaterial color={B} gradientMap={toonGradient()} />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
 // ─── Scene root ──────────────────────────────────────────────────────────────────
 export default function Scene({
   keysRef, activeZone, onNearChange, onSelectZone, onLeaveZone, playerPosRef, travelRef,
-  onModelClick, chatOpen, onAsk, isLoading, onCloseChat,
+  onModelClick, onOpenMap, cameraViewRef,
 }) {
   const characterRef = useRef()
   const focusPos = activeZone ? ZONE_POS[activeZone] : null
@@ -616,15 +765,13 @@ export default function Scene({
           travelRef={travelRef}
           obstacles={obstacles}
           onModelClick={onModelClick}
-          chatOpen={chatOpen}
-          onAsk={onAsk}
-          isLoading={isLoading}
-          onCloseChat={onCloseChat}
+          cameraViewRef={cameraViewRef}
         />
+        <Cat characterRef={characterRef} />
         {ZONES.map((zone) => (
           <ZoneArea key={zone.name} {...zone} active={activeZone === zone.name} onSelect={onSelectZone} />
         ))}
-        <CentralMap />
+        <CentralMap onOpenMap={onOpenMap} />
         <Paths />
         <Decor trees={trees} rocks={rocks} blooms={blooms} />
       </Suspense>
@@ -633,7 +780,11 @@ export default function Scene({
       <HomeMarker />
       <ContactShadows position={[0, 0.02, 0]} opacity={0.26} scale={70} blur={2.6} far={9} color="#2f6b3a" />
 
-      <FollowCamera characterRef={characterRef} focusPos={focusPos} />
+      <FollowCamera characterRef={characterRef} focusPos={focusPos} viewRef={cameraViewRef} />
+
+      <EffectComposer>
+        <Pixelation granularity={5} />
+      </EffectComposer>
     </Canvas>
   )
 }
