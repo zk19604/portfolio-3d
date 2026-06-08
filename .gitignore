@@ -1,7 +1,6 @@
 # Python
 fastapi/venv/
 fastapi/__pycache__/
-fastapi/.env
 **/*.pyc
 .DS_Store
 
@@ -9,5 +8,7 @@ fastapi/.env
 frontend/node_modules/
 frontend/dist/
 
-# Env
-.env
+# Env — never commit secrets (any .env anywhere), but allow example templates
+**/.env
+**/.env.*
+!**/.env.example
