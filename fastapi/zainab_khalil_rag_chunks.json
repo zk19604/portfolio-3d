@@ -1,0 +1,56 @@
+[
+  {
+    "chunk_id": "zainab_identity",
+    "section": "Identity",
+    "text": "Zainab Khalil is a Computer Science student at FAST NUCES Lahore, Pakistan. She can be reached at zainab19604khalil@gmail.com. Her LinkedIn is linkedin.com/in/zainab-khalil-332b1831b, GitHub is github.com/zk19604, and portfolio is zk19604.github.io/portfolio.",
+    "metadata": { "type": "contact", "person": "Zainab Khalil" }
+  },
+  {
+    "chunk_id": "zainab_education_fast",
+    "section": "Education",
+    "text": "Zainab Khalil is pursuing a Bachelor of Computer Science at FAST NUCES Lahore, Pakistan, with a GPA of 3.74/4.0. She is on the Dean's List (2023–2025) and expects to graduate in May 2027. Relevant coursework includes Data Structures & Algorithms, Operating Systems, Database Systems, Computer Networks, Machine Learning, Artificial Intelligence, and Software Engineering.",
+    "metadata": { "type": "education", "institution": "FAST NUCES", "degree": "BS Computer Science", "gpa": 3.74 }
+  },
+  {
+    "chunk_id": "zainab_education_sicas",
+    "section": "Education",
+    "text": "Zainab Khalil completed A-Levels at SICAS Lahore from August 2021 to June 2023, earning 4 A* grades in Mathematics, Physics, Biology, and Chemistry. She achieved 3rd Position in Punjab (Best Across 3 A-Level Subjects) and was Top in Pakistan for Biology at O-Levels.",
+    "metadata": { "type": "education", "institution": "SICAS", "level": "A-Levels", "grades": "4 A*", "distinction": "3rd in Punjab, Top in Pakistan for Biology" }
+  },
+  {
+    "chunk_id": "zainab_experience_aice",
+    "section": "Work Experience",
+    "text": "Zainab Khalil worked as a Software Engineer Intern at AICE XPERT from January 2026 to April 2026. She expanded a live B2B SaaS platform to 5,000+ professionals by shipping full-stack features on a Next.js/Express/Supabase stack, including card management, QR customisation, and NFC integration. She built a live phone-preview component with instant QR rendering supporting 20+ dot shapes, gradient fills, and custom logos, eliminating third-party QR tool dependencies. She shipped a cross-platform analytics pipeline tracking card taps, geo-location, device breakdowns, and link clicks to inform premium upsell strategy. She also engineered 10+ RESTful API endpoints enabling dynamic data flow between frontend and backend within a 4-member Agile team.",
+    "metadata": { "type": "work_experience", "company": "AICE XPERT", "role": "Software Engineer Intern", "start": "2026-01", "end": "2026-04", "stack": ["Next.js", "Express", "Supabase"] }
+  },
+  {
+    "chunk_id": "zainab_experience_infotech",
+    "section": "Work Experience",
+    "text": "Zainab Khalil interned as a Software Engineering Intern at INFOTECH from July 2025 to August 2025. She architected 5+ microservices using Spring Boot, applying SOLID principles and clean architecture. She implemented service discovery via Netflix Eureka across distributed services for dynamic routing and fault-tolerant communication. She also centralized routing via an API Gateway, consolidating 10+ endpoints and improving system observability, security, and traceability.",
+    "metadata": { "type": "work_experience", "company": "INFOTECH", "role": "Software Engineering Intern", "start": "2025-07", "end": "2025-08", "stack": ["Spring Boot", "Netflix Eureka", "API Gateway"] }
+  },
+  {
+    "chunk_id": "zainab_project_resumflow",
+    "section": "Projects",
+    "text": "ResuFlow is an AI-Powered CV-to-Portfolio Pipeline built by Zainab Khalil using React, Node.js, MongoDB, and the Gemini API. It is an end-to-end pipeline that transforms unstructured CV data into deployed portfolio websites via AI-driven extraction. The Gemini API converts free-form text into validated JSON schemas. Deployment is automated via Vercel APIs with integrated QR code generation (Level H error correction) for one-click hosting and sharing.",
+    "metadata": { "type": "project", "name": "ResuFlow", "stack": ["React", "Node.js", "MongoDB", "Gemini API", "Vercel"] }
+  },
+  {
+    "chunk_id": "zainab_project_android_housing",
+    "section": "Projects",
+    "text": "Zainab Khalil developed an Android Housing Service App using Java, Firebase, and Cloudinary. It is a full-stack Android application supporting tenant and landlord workflows with authentication and real-time sync. It manages 100+ property listings via Firebase Realtime Database and integrates AI-based recommendations for improved property discovery.",
+    "metadata": { "type": "project", "name": "Android Housing Service App", "stack": ["Java", "Firebase", "Cloudinary"] }
+  },
+  {
+    "chunk_id": "zainab_project_music_recommendation",
+    "section": "Projects",
+    "text": "Zainab Khalil built a Mood-Based Music Recommendation System using Node.js, SQL Server, and the Spotify API. It is a backend-driven system mapping user mood inputs to dynamically generated Spotify playlists with 10+ songs per session. The system uses a normalized relational schema spanning 10+ tables for efficient storage and retrieval of user and playlist data.",
+    "metadata": { "type": "project", "name": "Mood-Based Music Recommendation System", "stack": ["Node.js", "SQL Server", "Spotify API"] }
+  },
+  {
+    "chunk_id": "zainab_technical_skills",
+    "section": "Technical Skills",
+    "text": "Zainab Khalil's technical skills include: Languages: C++, Java, JavaScript, Assembly (x86). Frameworks: React, Next.js, Node.js, Spring Boot, Android (Java). Databases: SQL Server, MySQL, MongoDB, Firebase Realtime Database. Core Concepts: Data Structures & Algorithms, OOP, System Design, Microservices Architecture. Tools: Git, Postman, REST APIs, Gemini API, Spotify API, Cloudinary, Netflix Eureka, Vercel.",
+    "metadata": { "type": "skills", "languages": ["C++", "Java", "JavaScript", "Assembly x86"], "frameworks": ["React", "Next.js", "Node.js", "Spring Boot", "Android Java"], "databases": ["SQL Server", "MySQL", "MongoDB", "Firebase"], "tools": ["Git", "Postman", "Gemini API", "Spotify API", "Cloudinary", "Netflix Eureka", "Vercel"] }
+  }
+]

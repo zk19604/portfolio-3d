@@ -34,5 +34,4 @@ def health():
 @app.post("/api/ask")
 async def ask(body: Question) -> dict:
     from rag import get_answer
-    answer = await get_answer(body.question)
-    return {"answer": answer}
+    return await get_answer(body.question)

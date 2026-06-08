@@ -53,16 +53,22 @@ export default function App() {
 
   const keysRef = usePlayerControls({ onInteract: enterZone, onExit: handleExit })
 
-  const handleAskQuestion = useCallback((question, onResponse) => {
+  const handleAskQuestion = useCallback(async (question, onResponse) => {
     setIsLoading(true)
-    setTimeout(() => {
+    try {
+      const res = await fetch('http://localhost:8000/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question }),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = await res.json()
+      onResponse(data.answer)
+    } catch (err) {
+      onResponse(`Sorry, I couldn't reach the brain right now (${err.message}). Make sure the backend is running on :8000.`)
+    } finally {
       setIsLoading(false)
-      onResponse(
-        `Query: "${question}". ` +
-        `In production this comes from the Gemini RAG pipeline at /api/ask. ` +
-        `Connect the backend and swap this setTimeout for a real fetch call.`
-      )
-    }, 2000)
+    }
   }, [])
 
   return (
