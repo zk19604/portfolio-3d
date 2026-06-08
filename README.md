@@ -1,81 +1,16 @@
-# Portfolio
+### Roblox Style Portfolio
+if you need a plain portfolio, visit: [zk19604.github.io/portfolio](https://zk19604.github.io/portfolio/)
 
-Interactive 3D developer portfolio powered by React Three Fiber + FastAPI + Gemini AI.
+however, for a fun portfolio this is the right place.
 
-## Stack
+i have built a RAG - to chat with me about my experience, projects, education, and skills.
 
-| Layer     | Tech                                         |
-|-----------|----------------------------------------------|
-| Frontend  | React 19, Vite, Three.js, @react-three/fiber |
-| 3D        | @react-three/drei, @react-three/rapier       |
-| Animation | Framer Motion                                |
-| Styling   | Tailwind CSS v3 (dark futuristic theme)      |
-| Backend   | FastAPI, Python 3.11+                        |
-| AI        | Google Gemini via RAG pipeline               |
+i have built a Roblox style 3D environment using the library **three.js**.
 
-## Project Structure
+i hope you have as much fun as I had while making it.
 
-```
-portfolio-2/
-├── assets/              # Source 3D assets (.glb, .fbx)
-├── frontend/            # Vite + React app
-│   └── src/
-│       ├── assets/      # Bundled assets (walking.glb, etc.)
-│       ├── components/  # React components
-│       └── hooks/       # Custom React hooks
-├── fastapi/             # Python API
-│   ├── main.py          # FastAPI app + CORS + routes
-│   ├── rag.py           # RAG pipeline
-│   ├── gemini_client.py # Gemini API wrapper
-│   ├── requirements.txt
-│   └── .env             # GEMINI_API_KEY
-└── start.sh             # Start both servers
-```
+feel free to explore my world at: [portfolio-3d-nu-six.vercel.app](https://portfolio-3d-nu-six.vercel.app/)
 
-## Getting Started
+if you want to give me some suggestions or hit me up in general, my email is: [zainab19604khalil@gmail.com](mailto:zainab19604khalil@gmail.com)
 
-### Prerequisites
-- Node.js 18+
-- Python 3.11+
-
-### Install dependencies
-
-```bash
-# Frontend
-cd frontend && npm install
-
-# Backend
-cd fastapi && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt
-```
-
-### Run (both servers)
-
-```bash
-chmod +x start.sh && ./start.sh
-```
-
-- Frontend: http://localhost:5173
-- API:      http://localhost:8000
-- API docs: http://localhost:8000/docs
-
-### Run individually
-
-```bash
-# Frontend
-cd frontend && npm run dev
-
-# Backend
-cd fastapi && source venv/bin/activate && uvicorn main:app --reload --port 8000
-```
-
-## API
-
-### POST /api/ask
-
-```json
-{ "question": "What projects have you worked on?" }
-```
-
-```json
-{ "answer": "..." }
-```
+happy exploring!
