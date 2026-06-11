@@ -13,6 +13,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "https://portfolio-3d-nu-six.vercel.app",
+        "https://portfolio-2-rho.vercel.app/", 
     ],
     # Also accept Vercel preview deployments (portfolio-3d-*.vercel.app).
     allow_origin_regex=r"https://portfolio-3d-.*\.vercel\.app",
